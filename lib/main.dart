@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/localization/app_localizations.dart';
+import 'core/widgets/wave_loader.dart';
 import 'core/localization/locale_controller.dart';
 import 'core/settings/currency_controller.dart';
 import 'core/config/app_config.dart';
@@ -98,7 +99,7 @@ class AppBootstrap extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     if (!auth.initialized) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(body: Center(child: WaveLoader()));
     }
     if (!auth.isAuthorized) return const AuthScreen();
     return const AppShell();

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/wave_loader.dart';
 import '../data/ai_result_model.dart';
 import '../../tasks/presentation/tasks_controller.dart';
 import '../../transactions/presentation/transactions_controller.dart';
@@ -224,7 +225,7 @@ class _ProcessingView extends StatelessWidget {
     return const Column(
       children: [
         SizedBox(height: AppSpacing.md),
-        CircularProgressIndicator(color: AppColors.accentPink),
+        WaveLoader(scale: 1.2),
         SizedBox(height: AppSpacing.md),
         Text(
           'Обрабатываю...',

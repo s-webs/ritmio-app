@@ -5,6 +5,8 @@ import '../../../core/localization/l10n_x.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/wave_loader.dart';
+import '../../../core/widgets/wave_refresh.dart';
 import '../data/task_model.dart';
 import 'tasks_controller.dart';
 
@@ -42,7 +44,7 @@ class _TasksScreenState extends State<TasksScreen> {
         child: SafeArea(
           bottom: false,
           child: c.isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: WaveLoader())
               : Column(
                   children: [
                     Padding(
@@ -57,32 +59,74 @@ class _TasksScreenState extends State<TasksScreen> {
                         onAdd: () => _openForm(),
                       ),
                     ),
-                    if (c.items.isEmpty)
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'Нет задач',
-                            style: TextStyle(color: AppColors.darkTextSecondary),
-                          ),
-                        ),
-                      )
-                    else
-                      Expanded(
-                        child: ListView.builder(
+                    Expanded(child: WaveRefresh(
+                      onRefresh: () => c.load(),
+                      child: Builder(builder: (_) {
+                        if (c.items.isEmpty) {
+                          return ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height: 300,
+                                child: Center(
+                                  child: Text(
+                                    l10n.t('tasks'),
+                                    style: const TextStyle(
+                                        color: AppColors.darkTextSecondary),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        final withDate = c.items
+                            .where((t) =>
+                                t.dueDate != null && t.dueDate!.isNotEmpty)
+                            .toList()
+                          ..sort((a, b) => a.dueDate!.compareTo(b.dueDate!));
+                        final withoutDate = c.items
+                            .where(
+                                (t) => t.dueDate == null || t.dueDate!.isEmpty)
+                            .toList();
+
+                        final rows = <Object>[];
+                        String? lastDate;
+                        for (final t in withDate) {
+                          if (t.dueDate != lastDate) {
+                            rows.add(t.dueDate!);
+                            lastDate = t.dueDate;
+                          }
+                          rows.add(t);
+                        }
+                        if (withoutDate.isNotEmpty) {
+                          rows.add('—');
+                          rows.addAll(withoutDate);
+                        }
+
+                        return ListView.builder(
+                          physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.fromLTRB(
                             AppSpacing.md,
                             AppSpacing.xs,
                             AppSpacing.md,
                             100,
                           ),
-                          itemCount: c.items.length,
-                          itemBuilder: (_, i) => _TaskCard(
-                            task: c.items[i],
-                            onDelete: () => c.remove(c.items[i].id),
-                            onDetails: () => _showDetails(c.items[i]),
-                          ),
-                        ),
-                      ),
+                          itemCount: rows.length,
+                          itemBuilder: (_, i) {
+                            final row = rows[i];
+                            if (row is String) {
+                              return _DateHeader(label: row);
+                            }
+                            final t = row as TaskModel;
+                            return _TaskCard(
+                              task: t,
+                              onDelete: () => c.remove(t.id),
+                              onDetails: () => _showDetails(t),
+                            );
+                          },
+                        );
+                      }),
+                    )),
                   ],
                 ),
         ),
@@ -258,6 +302,29 @@ class _TasksScreenState extends State<TasksScreen> {
     } else {
       await c.update(editing.id, body);
     }
+  }
+}
+
+// ── Date header ──────────────────────────────────────────────────────────────
+
+class _DateHeader extends StatelessWidget {
+  const _DateHeader({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.4,
+          color: AppColors.darkTextSecondary,
+        ),
+      ),
+    );
   }
 }
 

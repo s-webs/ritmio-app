@@ -7,6 +7,7 @@ import '../../../core/settings/currency_controller.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/app_toast.dart';
 import '../../auth/presentation/auth_controller.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -32,25 +33,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _save() async {
     final currCtrl = context.read<CurrencyController>();
     final locCtrl = context.read<LocaleController>();
-    final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
     await currCtrl.setCurrency(_pendingCurrency);
     await locCtrl.setLocale(_pendingLocale);
     if (!mounted) return;
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(l10n.t('settingsSaved')),
-        backgroundColor: AppColors.primaryPurple,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          0,
-          AppSpacing.md,
-          100,
-        ),
-      ),
-    );
+    AppToast.show(context, l10n.t('settingsSaved'));
   }
 
   Future<void> _logout() async {

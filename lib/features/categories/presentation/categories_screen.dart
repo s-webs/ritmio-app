@@ -5,6 +5,7 @@ import '../../../core/localization/l10n_x.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/wave_loader.dart';
 import '../data/category_model.dart';
 import 'categories_controller.dart';
 
@@ -39,7 +40,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ),
         ),
         child: c.isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: WaveLoader())
             : Column(
                 children: [
                   Padding(
